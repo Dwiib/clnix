@@ -1,0 +1,6 @@
+.*
+!.envrc
+!.git*
+
+result
+result-*
