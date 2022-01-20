@@ -27,7 +27,7 @@ foreach ( split /\n/, get( $distinfo{"release-index-url"} ) ) {
     shift @parts;    # size
     my $md5 = shift @parts;
     shift @parts;    # content-sha1
-    shift @parts;    # prefix
+    my $prefix = shift @parts;
 
     my %systems = ();
     foreach (@parts) {
@@ -38,6 +38,7 @@ foreach ( split /\n/, get( $distinfo{"release-index-url"} ) ) {
     my %project_info = (
         "url"     => $url,
         "md5"     => $md5,
+        "prefix"  => $prefix,
         "systems" => \%systems,
     );
     $projects{$project} = \%project_info;
@@ -53,11 +54,8 @@ foreach ( split /\n/, get( $distinfo{"system-index-url"} ) ) {
     my $system_name = shift @parts;
     my @deps        = @parts;
 
-    my %system_info = (
-        "name" => $system_name,
-        "deps" => \@deps,
-    );
-    $projects{$project}{"systems"}{$system_file} = \%system_info;
+    $projects{$project}{"systems"}{"$system_file.asd"}{$system_name} =
+      \@deps;
 }
 
 my $distinfo_version = $distinfo{"version"};

@@ -6,11 +6,11 @@ let
   hashes = lib.importJSON ./hashes.json;
   projects = lib.importJSON (./. + "/dist-${version}.json");
 
-in builtins.mapAttrs (pname:
-  { md5, systems, url }: {
+in builtins.mapAttrs (name:
+  { md5, prefix, systems, url }: {
+    inherit name prefix systems;
     src = fetchurl {
       inherit url;
       sha256 = hashes.${md5};
     };
-    inherit systems;
   }) projects

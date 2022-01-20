@@ -10,6 +10,12 @@ Philosophy:
 - If it felt non-obvious (rule-of-thumb: did it take >10min?), comment!
 - Provide a recent (<1 year old) ASDF, replacing the one in the implementation if necessary.
 
+Non-Goals:
+
+- Broad compiler support.
+- Broad platform support.
+- FHS-ish `$out` layout.
+
 ## Other Notes
 
 - Anything in `scripts/` should work inside the `devShell`.

@@ -17,16 +17,21 @@
           ];
         };
         legacyPackages = {
-          mkLispPackages = { lisp }:
+          mkLispPackages = { lisp, quicklisp ? legacyPackages.quicklisp { } }:
             pkgs.lib.makeScope pkgs.newScope (self:
-              pkgs.callPackage ./mk-lisp-packages.nix {
-                inherit lisp;
+              pkgs.callPackage ./pkgs/mk-lisp-packages.nix {
+                inherit lisp quicklisp;
                 lispPackages = self;
               });
-          qlnix = pkgs.callPackage ./quicklisp { };
-          sbclPackages =
-            legacyPackages.mkLispPackages { lisp = packages.sbcl; };
+          quicklisp = pkgs.callPackage ./quicklisp { };
+          wrapLisp = lisp:
+            lisp // {
+              packages = legacyPackages.mkLispPackages { inherit lisp; };
+            };
         };
-        packages = { sbcl = pkgs.callPackage ./impls/sbcl.nix { }; };
+        packages = {
+          sbcl =
+            legacyPackages.wrapLisp (pkgs.callPackage ./impls/sbcl.nix { });
+        };
       });
 }
