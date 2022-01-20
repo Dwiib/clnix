@@ -15,28 +15,45 @@ in stdenv.mkDerivation (cleanArgs // {
 
   configurePhase = args.configurePhase or ''
     runHook preConfigure
-    addToSearchPath CL_SOURCE_REGISTRY "$(pwd)"
-    addToSearchPath ASDF_OUTPUT_TRANSLATIONS "$(pwd)"
-    mkdir "$out"
-    addToSearchPath ASDF_OUTPUT_TRANSLATIONS "$out"
+
+    mkdir "$out/lib"
+    addToSearchPath CL_SOURCE_REGISTRY "$out/src"
+    addToSearchPath ASDF_OUTPUT_TRANSLATIONS "$out/src"
+    addToSearchPath ASDF_OUTPUT_TRANSLATIONS "$out/lib"
+
     runHook postConfigure
+  '';
+
+  postUnpack = (args.postUnpack or "") + ''
+    mkdir "$out"
+    mv "$sourceRoot" "$out/src"
+    sourceRoot="$out/src"
   '';
 
   buildPhase = args.buildPhase or ''
     runHook preBuild
+
     ${lisp.loadCommand [ ./common.lisp ./build-phase.lisp ]}
+
     runHook postBuild
   '';
 
   checkPhase = args.checkPhase or ''
     runHook preCheck
+
     ${lisp.loadCommand [ ./common.lisp ./check-phase.lisp ]}
+
     runHook postCheck
   '';
 
   installPhase = args.installPhase or ''
     runHook preInstall
-    ${lisp.loadCommand [ ./common.lisp ./install-phase.lisp ]}
+
+    # We already built everything into $out, so no need to actually do
+    # anything.
+
     runHook postInstall
   '';
+
+  setupHook = ./setup-hook.sh;
 })

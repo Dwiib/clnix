@@ -19,7 +19,7 @@
         legacyPackages = {
           mkLispPackages = { lisp, quicklisp ? legacyPackages.quicklisp { } }:
             pkgs.lib.makeScope pkgs.newScope (self:
-              pkgs.callPackage ./pkgs/mk-lisp-packages.nix {
+              pkgs.callPackage ./lisp-packages/mk-lisp-packages.nix {
                 inherit lisp quicklisp;
                 lispPackages = self;
               });
