@@ -1,4 +1,4 @@
-{ lib, lisp, stdenv }:
+{ lib, lisp, lispPackages, stdenv }:
 
 args:
 
@@ -8,9 +8,7 @@ let
 in stdenv.mkDerivation (cleanArgs // {
   nativeBuildInputs = (args.nativeBuildInputs or [ ]) ++ [ lisp ];
 
-  asdfSystemNames = args.asdfSystemNames or (if args ? asdfSystems then
-    builtins.concatMap builtins.attrNames (builtins.attrValues args.asdfSystems)
-  else if args ? pname then
+  asdfSystemNames = args.asdfSystemNames or (if args ? pname then
     [ args.pname ]
   else
     [ args.name ]);
