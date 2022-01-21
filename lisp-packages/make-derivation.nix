@@ -13,6 +13,14 @@ in stdenv.mkDerivation (cleanArgs // {
   else
     [ args.name ]);
 
+  setSourceRoot = args.setSourceRoot or ''
+    mkdir -p "$out/src"
+    for i in *; do
+      mv "$i" "$out/src/"
+    done
+    sourceRoot="$out/src"
+  '';
+
   configurePhase = args.configurePhase or ''
     runHook preConfigure
 
@@ -22,12 +30,6 @@ in stdenv.mkDerivation (cleanArgs // {
     addToSearchPath ASDF_OUTPUT_TRANSLATIONS "$out/lib"
 
     runHook postConfigure
-  '';
-
-  postUnpack = (args.postUnpack or "") + ''
-    mkdir "$out"
-    mv "$sourceRoot" "$out/src"
-    sourceRoot="$out/src"
   '';
 
   buildPhase = args.buildPhase or ''

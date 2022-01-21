@@ -7,7 +7,7 @@ Philosophy:
 
 - Be as compatible with `stdenv.mkDerivation` as possible.
 - Bug ASDF maintainers before doing anything gross.
-- Build as much of QuickLisp as is practical, but reasonable code is more important than 100% coverage.
+- Build as much of Quicklisp as is practical, but reasonable code is more important than 100% coverage.
 - If it felt non-obvious (rule-of-thumb: did it take >10min?), comment!
 - Provide a recent (<1 year old) ASDF, replacing the one in the implementation if necessary.
 
