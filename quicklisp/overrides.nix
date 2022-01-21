@@ -1,9 +1,9 @@
 { }:
 
 {
-  projects = {
-    # Temporary tweaks to get things building. These need more investigation!
-    # lift-20211209-git = old: { doCheck = false; };
+  swank = old: {
+    patchPhase = ''
+      sed -ie "s|(default-fasl-dir)|#p\"$out/lib/slime-v2.26.1/\"|" slime-v2.26.1/swank-loader.lisp
+    '';
   };
-  systems = { };
 }

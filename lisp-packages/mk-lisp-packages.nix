@@ -100,7 +100,9 @@ let
           export CL_SOURCE_REGISTRY ASDF_OUTPUT_TRANSLATIONS
         '';
       };
-    in stdenv.mkDerivation args) qlSystemInfo;
+    in stdenv.mkDerivation
+    (args // ((quicklispOverrides.${systemName} or (_: { })) args)))
+    qlSystemInfo;
 
   # a derivation, which is simply a linkFarm of all the systems in Quicklisp,
   # for easily testing that everything works.
