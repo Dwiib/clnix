@@ -102,83 +102,14 @@ let
       };
     in stdenv.mkDerivation args) qlSystemInfo;
 
-  # an attrset of derivations, mapping project names to derivations that
-  # collect (via copies) the systems provided by the package, and test them
-  qlProjects = builtins.mapAttrs (projectName: projectInfo:
-    let
-      systemNames = builtins.concatMap builtins.attrNames
-        (builtins.attrValues projectInfo.systems);
-      systems = builtins.map (systemName: qlSystems.${systemName}) systemNames;
-      args = {
-        pname = "ql-project-" + projectName;
-        version = qlVersions.${projectName};
-
-        nativeBuildInputs = [ lisp ];
-        buildInputs = systems;
-
-        unpackPhase = ''
-          runHook preUnpack
-
-          mkdir -p $out/lib
-          for system in ${toString systems}; do
-            for f in $system/lib/*; do
-              cp -r $f $out/lib/
-            done
-            find $out -type d -exec chmod 755 {} \;
-            find $out -type f -exec chmod 644 {} \;
-          done
-
-          mkdir -p $out/src
-          tar -xzC $out/src -f ${projectInfo.src}
-          for asd in ${toString (builtins.attrNames projectInfo.systems)}; do
-            ln -s $out/src/${projectInfo.prefix}/$asd $out/src/
-          done
-
-          runHook postUnpack
-        '';
-
-        configurePhase = ''
-          runHook preConfigure
-
-          mkdir -p $out/lib
-          CL_SOURCE_REGISTRY="$out/src:''${CL_SOURCE_REGISTRY:-}"
-          ASDF_OUTPUT_TRANSLATIONS="$out/src:$out/lib:''${ASDF_OUTPUT_TRANSLATIONS:-}"
-          export CL_SOURCE_REGISTRY ASDF_OUTPUT_TRANSLATIONS
-
-          runHook postConfigure
-        '';
-
-        asdfSystemNames = systemNames;
-        doCheck = true;
-        checkPhase = ''
-          runHook preBuild
-
-          echo ${lisp.loadCommand [ ./common.lisp ./check-phase.lisp ]}
-
-          runHook postBuild
-        '';
-
-        installPhase = ''
-          runHook preInstall
-          runHook postInstall
-        '';
-
-        setupHook = writeText "setup-hook" ''
-          addToSearchPath CL_SOURCE_REGISTRY "@out@/src"
-          addToSearchPath ASDF_OUTPUT_TRANSLATIONS "@out@/src"
-          addToSearchPath ASDF_OUTPUT_TRANSLATIONS "@out@/lib"
-        '';
-
-        passthru.src = projectInfo.src;
-      };
-    in stdenv.mkDerivation args) quicklisp.projects;
-
-  # a derivation, which is simply a linkFarm of all the projects in Quicklisp
-  # (and, by extension, all the systems), for easily building the world
-  allQuicklispProjects = linkFarm "all-quicklisp-projects" (lib.mapAttrsToList
-    (projectName: projectDrv: {
-      name = projectName;
-      path = projectDrv;
+  # a derivation, which is simply a linkFarm of all the systems in Quicklisp,
+  # for easily testing that everything works.
+  #
+  # TODO: Add a checkPhase (or a flake check?) that runs all their tests too.
+  allQuicklispSystems = linkFarm "all-quicklisp-systems" (lib.mapAttrsToList
+    (systemName: systemDrv: {
+      name = systemName;
+      path = systemDrv;
     }) qlSystems);
 
-in { inherit allQuicklispProjects mkDerivation; } // qlProjects // otherPackages
+in { inherit allQuicklispSystems mkDerivation; } // qlSystems // otherPackages
