@@ -1,4 +1,4 @@
-{ lib, lisp, lispPackages, stdenv }:
+{ lib, lisp, lispPackages, stdenv, writeText }:
 
 args:
 
@@ -13,21 +13,22 @@ in stdenv.mkDerivation (cleanArgs // {
   else
     [ args.name ]);
 
-  setSourceRoot = args.setSourceRoot or ''
-    mkdir -p "$out/src"
-    for i in *; do
-      mv "$i" "$out/src/"
-    done
+  postUnpack = args.postUnpack or ''
+    # This is fragile!
+    cd "$NIX_BUILD_TOP"
+    mkdir "$out"
+    mv "$sourceRoot" "$out/src"
     sourceRoot="$out/src"
+    cd "$out/src"
   '';
 
   configurePhase = args.configurePhase or ''
     runHook preConfigure
 
-    mkdir "$out/lib"
-    addToSearchPath CL_SOURCE_REGISTRY "$out/src"
-    addToSearchPath ASDF_OUTPUT_TRANSLATIONS "$out/src"
-    addToSearchPath ASDF_OUTPUT_TRANSLATIONS "$out/lib"
+    mkdir $out/lib
+    CL_SOURCE_REGISTRY="$out/src:''${CL_SOURCE_REGISTRY:-}"
+    ASDF_OUTPUT_TRANSLATIONS="$out/src:$out/lib:''${ASDF_OUTPUT_TRANSLATIONS:-}"
+    export CL_SOURCE_REGISTRY ASDF_OUTPUT_TRANSLATIONS
 
     runHook postConfigure
   '';
@@ -57,5 +58,9 @@ in stdenv.mkDerivation (cleanArgs // {
     runHook postInstall
   '';
 
-  setupHook = ./setup-hook.sh;
+  setupHook = writeText "setup-hook" ''
+    CL_SOURCE_REGISTRY="@out@/src:''${CL_SOURCE_REGISTRY:-}"
+    ASDF_OUTPUT_TRANSLATIONS="@out@/src:@out@/lib:''${ASDF_OUTPUT_TRANSLATIONS:-}"
+    export CL_SOURCE_REGISTRY ASDF_OUTPUT_TRANSLATIONS
+  '';
 })

@@ -153,7 +153,7 @@ let
         checkPhase = ''
           runHook preBuild
 
-          ${lisp.loadCommand [ ./common.lisp ./check-phase.lisp ]}
+          echo ${lisp.loadCommand [ ./common.lisp ./check-phase.lisp ]}
 
           runHook postBuild
         '';
