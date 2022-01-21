@@ -52,8 +52,8 @@ let
           builtins.abort
           "Multiple .asd files in project ${projectName} defined the system ${systemName}";
       } (lib.zipAttrs (builtins.attrValues projectInfo.systems)).${systemName};
-      depSystems =
-        builtins.map (depSystemName: qlSystems.${depSystemName}) depSystemNames;
+      depSystems = builtins.map (depSystemName: qlSystems.${depSystemName})
+        (builtins.filter (systemName: systemName != "asdf") depSystemNames);
       args = {
         pname = "ql-system-" + lib.strings.sanitizeDerivationName systemName;
         version = qlVersions.${projectName};
@@ -73,9 +73,9 @@ let
           runHook preConfigure
 
           mkdir -p $out/lib
-          addToSearchPath CL_SOURCE_REGISTRY $out/src
-          addToSearchPath ASDF_OUTPUT_TRANSLATIONS $out/src
-          addToSearchPath ASDF_OUTPUT_TRANSLATIONS $out/lib
+          CL_SOURCE_REGISTRY="$out/src:''${CL_SOURCE_REGISTRY:-}"
+          ASDF_OUTPUT_TRANSLATIONS="$out/src:$out/lib:''${ASDF_OUTPUT_TRANSLATIONS:-}"
+          export CL_SOURCE_REGISTRY ASDF_OUTPUT_TRANSLATIONS
 
           runHook postConfigure
         '';
@@ -95,9 +95,9 @@ let
         '';
 
         setupHook = writeText "setup-hook" ''
-          addToSearchPath CL_SOURCE_REGISTRY "@out@/src"
-          addToSearchPath ASDF_OUTPUT_TRANSLATIONS "@out@/src"
-          addToSearchPath ASDF_OUTPUT_TRANSLATIONS "@out@/lib"
+          CL_SOURCE_REGISTRY="@out@/src:''${CL_SOURCE_REGISTRY:-}"
+          ASDF_OUTPUT_TRANSLATIONS="@out@/src:@out@/lib:''${ASDF_OUTPUT_TRANSLATIONS:-}"
+          export CL_SOURCE_REGISTRY ASDF_OUTPUT_TRANSLATIONS
         '';
       };
     in stdenv.mkDerivation args) qlSystemInfo;
@@ -136,8 +136,11 @@ let
 
           mkdir -p $out/lib
           for system in ${toString systems}; do
-            cp -r $system/lib/* $out/lib/
+            for f in $system/lib/*; do
+              cp -r $f $out/lib/
+            done
             find $out -type d -exec chmod 755 {} \;
+            find $out -type f -exec chmod 644 {} \;
           done
 
           mkdir -p $out/src
