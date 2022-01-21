@@ -110,7 +110,7 @@ let
         (builtins.attrValues projectInfo.systems);
       systems = builtins.map (systemName: qlSystems.${systemName}) systemNames;
       args = {
-        pname = "ql-" + projectName;
+        pname = "ql-project-" + projectName;
         version = qlVersions.${projectName};
 
         nativeBuildInputs = [ lisp ];
@@ -118,21 +118,6 @@ let
 
         unpackPhase = ''
           runHook preUnpack
-          runHook postUnpack
-        '';
-
-        asdfSystemNames = systemNames;
-        doCheck = true;
-        checkPhase = ''
-          runHook preBuild
-
-          ${lisp.loadCommand [ ./common.lisp ./check-phase.lisp ]}
-
-          runHook postBuild
-        '';
-
-        installPhase = ''
-          runHook preInstall
 
           mkdir -p $out/lib
           for system in ${toString systems}; do
@@ -149,6 +134,32 @@ let
             ln -s $out/src/${projectInfo.prefix}/$asd $out/src/
           done
 
+          runHook postUnpack
+        '';
+
+        configurePhase = ''
+          runHook preConfigure
+
+          mkdir -p $out/lib
+          CL_SOURCE_REGISTRY="$out/src:''${CL_SOURCE_REGISTRY:-}"
+          ASDF_OUTPUT_TRANSLATIONS="$out/src:$out/lib:''${ASDF_OUTPUT_TRANSLATIONS:-}"
+          export CL_SOURCE_REGISTRY ASDF_OUTPUT_TRANSLATIONS
+
+          runHook postConfigure
+        '';
+
+        asdfSystemNames = systemNames;
+        doCheck = true;
+        checkPhase = ''
+          runHook preBuild
+
+          ${lisp.loadCommand [ ./common.lisp ./check-phase.lisp ]}
+
+          runHook postBuild
+        '';
+
+        installPhase = ''
+          runHook preInstall
           runHook postInstall
         '';
 
@@ -157,6 +168,8 @@ let
           addToSearchPath ASDF_OUTPUT_TRANSLATIONS "@out@/src"
           addToSearchPath ASDF_OUTPUT_TRANSLATIONS "@out@/lib"
         '';
+
+        passthru.src = projectInfo.src;
       };
     in stdenv.mkDerivation args) quicklisp.projects;
 
