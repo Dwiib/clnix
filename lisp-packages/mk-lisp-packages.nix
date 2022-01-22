@@ -55,7 +55,7 @@ let
       depSystems = builtins.map (depSystemName: qlSystems.${depSystemName})
         (builtins.filter (systemName: systemName != "asdf") depSystemNames);
       args = {
-        pname = "ql-system-" + lib.strings.sanitizeDerivationName systemName;
+        pname = "ql-" + lib.strings.sanitizeDerivationName systemName;
         version = qlVersions.${projectName};
 
         src = projectInfo.src;
@@ -74,6 +74,7 @@ let
 
           mkdir -p $out/lib
           CL_SOURCE_REGISTRY="$out/src:''${CL_SOURCE_REGISTRY:-}"
+          ASDF_OUTPUT_TRANSLATIONS="$out/bin:$out/bin:''${ASDF_OUTPUT_TRANSLATIONS:-}"
           ASDF_OUTPUT_TRANSLATIONS="$out/src:$out/lib:''${ASDF_OUTPUT_TRANSLATIONS:-}"
           export CL_SOURCE_REGISTRY ASDF_OUTPUT_TRANSLATIONS
 
@@ -84,7 +85,9 @@ let
         buildPhase = ''
           runHook preBuild
 
-          ${lisp.loadCommand [ ./common.lisp ./build-phase.lisp ]}
+          while [[ ! -f "$NIX_BUILD_TOP/.clnix-finished-binaries" ]]; do
+            ${lisp.loadCommand [ ./common.lisp ./build-phase.lisp ]}
+          done
 
           runHook postBuild
         '';

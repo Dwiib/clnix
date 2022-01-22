@@ -3,7 +3,7 @@
 
 mkDerivation {
   pname = "coalton";
-  version = "20210113-git";
+  version = "20220113-git";
 
   src = fetchFromGitHub {
     owner = "coalton-lang";

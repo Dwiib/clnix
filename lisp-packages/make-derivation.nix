@@ -2,10 +2,7 @@
 
 args:
 
-let
-  cleanArgs = lib.filterAttrs (k: _: !(builtins.elem k [ "asdfSystems" ])) args;
-
-in stdenv.mkDerivation (cleanArgs // {
+stdenv.mkDerivation (args // {
   nativeBuildInputs = (args.nativeBuildInputs or [ ]) ++ [ lisp ];
 
   asdfSystemNames = args.asdfSystemNames or (if args ? pname then
@@ -27,6 +24,7 @@ in stdenv.mkDerivation (cleanArgs // {
 
     mkdir $out/lib
     CL_SOURCE_REGISTRY="$out/src:''${CL_SOURCE_REGISTRY:-}"
+    ASDF_OUTPUT_TRANSLATIONS="$out/bin:$out/bin:''${ASDF_OUTPUT_TRANSLATIONS:-}"
     ASDF_OUTPUT_TRANSLATIONS="$out/src:$out/lib:''${ASDF_OUTPUT_TRANSLATIONS:-}"
     export CL_SOURCE_REGISTRY ASDF_OUTPUT_TRANSLATIONS
 
@@ -36,7 +34,9 @@ in stdenv.mkDerivation (cleanArgs // {
   buildPhase = args.buildPhase or ''
     runHook preBuild
 
-    ${lisp.loadCommand [ ./common.lisp ./build-phase.lisp ]}
+    while [[ ! -f "$NIX_BUILD_TOP/.clnix-finished-binaries" ]]; do
+      ${lisp.loadCommand [ ./common.lisp ./build-phase.lisp ]}
+    done
 
     runHook postBuild
   '';
@@ -58,9 +58,12 @@ in stdenv.mkDerivation (cleanArgs // {
     runHook postInstall
   '';
 
-  setupHook = writeText "setup-hook" ''
+  setupHook = args.setupHook or writeText "setup-hook" ''
     CL_SOURCE_REGISTRY="@out@/src:''${CL_SOURCE_REGISTRY:-}"
     ASDF_OUTPUT_TRANSLATIONS="@out@/src:@out@/lib:''${ASDF_OUTPUT_TRANSLATIONS:-}"
     export CL_SOURCE_REGISTRY ASDF_OUTPUT_TRANSLATIONS
   '';
+
+  # TODO: Only enable this for Lisp implementations that depend on it.
+  dontStrip = args.dontStrip or true;
 })
