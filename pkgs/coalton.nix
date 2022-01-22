@@ -1,5 +1,5 @@
-{ alexandria, fetchFromGitHub, float-features, fset, global-vars, mkDerivation
-, split-sequence, trivia }:
+{ alexandria, fetchFromGitHub, float-features, fset, global-vars, lib
+, mkDerivation, split-sequence, trivia }:
 
 mkDerivation {
   pname = "coalton";
@@ -14,4 +14,10 @@ mkDerivation {
 
   propagatedBuildInputs =
     [ alexandria float-features fset global-vars split-sequence trivia ];
+
+  meta = {
+    description =
+      "Coalton is an efficient, statically typed functional programming language that supercharges Common Lisp.";
+    license = lib.licenses.mit;
+  };
 }
