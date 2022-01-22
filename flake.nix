@@ -17,8 +17,9 @@
             });
         mkQuicklisp = pkgs.callPackage ./quicklisp { };
         wrapLisp = lisp:
-          lisp // {
+          lisp // rec {
             packages = mkLispPackages { inherit lisp; };
+            swank = packages.clnix-swank-server;
           };
       in rec {
         devShell = pkgs.mkShell {

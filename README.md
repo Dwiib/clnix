@@ -85,6 +85,19 @@ nix-repl> sbcl.packages.mkDerivation
 { __functionArgs = { ... }; __functor = «lambda @ /nix/store/nyg84l8l13kic8g3mxcczi71sjr6vm0g-source/lib/trivial.nix:385:19»; override = { ... }; }
 ```
 
+### clnix-swank-server
+
+A simple helper binary, `clnix-swank-server`, is provided on the `swank` attribute of each implementation.
+This is also provided in lispPackages.
+
+```
+nix-repl> sbcl.swank
+«derivation /nix/store/alvlj6603r3s5vhry883dvz0nl09kyll-clnix-swank-server-0.0.1.drv»
+
+nix-repl> sbcl.packages.clnix-swank-server
+«derivation /nix/store/alvlj6603r3s5vhry883dvz0nl09kyll-clnix-swank-server-0.0.1.drv»
+```
+
 Recipes
 -------
 
@@ -122,7 +135,31 @@ The resulting binaries are in `$out/bin`, with the same name as the system.
 
 ### Starting a Swank Server
 
-TODO
+The `clnix-swank-server` helper binary can be used to start a Swank server.
+An example of using it:
+
+```nix
+{ alexandria, clnix-swank-server, closer-mop, iterate, mkDerivation, mkShell }:
+
+let
+  my-package = mkDerivation {
+    pname = "my-package";
+    version = "0.1.0";
+    src = ./.;
+
+    propagatedBuildInputs = [ alexandria closer-mop iterate ];
+
+    passthru.devShell = mkShell {
+      inputsFrom = [ my-package ];
+      nativeBuildInputs = [ clnix-swank-server ];
+    };
+  };
+
+in my-package
+```
+
+Then, after doing `nix develop .#my-package.devShell`, run `clnix-swank-server` from the directory `my-package.asd` is in.
+This should start a Swank server on port 4005 that is able to load `my-package` and any of its dependencies.
 
 Troubleshooting
 ---------------
