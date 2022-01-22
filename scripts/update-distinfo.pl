@@ -30,17 +30,14 @@ foreach ( split /\n/, get( $distinfo{"release-index-url"} ) ) {
     shift @parts;    # content-sha1
     my $prefix = shift @parts;
 
-    my %project_systems = ();
-    foreach (@parts) {
-        my %file_info = ();
-        $project_systems{$_} = \%file_info;
-    }
+    my %system_deps = ();
 
     my %project_info = (
-        "url"     => $url,
-        "md5"     => $md5,
-        "prefix"  => $prefix,
-        "systems" => \%project_systems,
+        "url"         => $url,
+        "md5"         => $md5,
+        "prefix"      => $prefix,
+        "asd-files"   => \@parts,
+        "system-deps" => \%system_deps,
     );
     $projects{$project} = \%project_info;
 }
@@ -50,18 +47,18 @@ foreach ( split /\n/, get( $distinfo{"system-index-url"} ) ) {
     my @parts         = split /\s+/, $line;
     next if ( @parts == 0 );
 
-    my $project     = shift @parts;
-    my $system_file = shift @parts;
-    my $system_name = shift @parts;
-    my @deps        = @parts;
+    my $project              = shift @parts;
+    my $system_file_basename = shift @parts;
+    my $system_name          = shift @parts;
+    my @deps                 = @parts;
 
-    $projects{$project}{"systems"}{"$system_file.asd"}{$system_name} =
+    $projects{$project}{"system-deps"}{$system_name} =
       \@deps;
-    my %system_load_info = (
-        "project" => $project,
-        "asd"     => "$system_file.asd"
+    my %system_info = (
+        "project"              => $project,
+        "system-file-basename" => $system_file_basename
     );
-    push @{ $systems{$system_name} }, \%system_load_info;
+    push @{ $systems{$system_name} }, \%system_info;
 }
 
 my $distinfo_version = $distinfo{"version"};

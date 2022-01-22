@@ -44,18 +44,24 @@ let
     let
       projectName = systemInfo.project;
       projectInfo = quicklisp.projects.${projectName};
-      inherit (projectInfo) prefix;
-      depSystemNames = zoi {
+
+      asdFileBasename = systemInfo.system-file-basename;
+      asdFile = zoi {
         zero = builtins.abort
-          "Could not find system ${systemName} in project ${projectName}; this is a bug in clnix";
+          "No .asd files in project ${projectName} defined the system ${systemName}";
         n = _:
           builtins.abort
           "Multiple .asd files in project ${projectName} defined the system ${systemName}";
-      } (lib.zipAttrs (builtins.attrValues projectInfo.systems)).${systemName};
+      } (builtins.filter
+        (asdPath: baseNameOf asdPath == "${asdFileBasename}.asd")
+        projectInfo.asd-files);
+
+      inherit (projectInfo) prefix;
+      depSystemNames = projectInfo.system-deps.${systemName};
       depSystems = builtins.map (depSystemName: qlSystems.${depSystemName})
         (builtins.filter (systemName: systemName != "asdf") depSystemNames);
       args = {
-        pname = "ql-" + lib.strings.sanitizeDerivationName systemName;
+        pname = lib.strings.sanitizeDerivationName systemName;
         version = qlVersions.${projectName};
 
         src = projectInfo.src;
@@ -65,7 +71,7 @@ let
         setSourceRoot = ''
           mkdir -p $out/src
           mv ${prefix} $out/src/${prefix}
-          ln -s $out/src/${prefix}/${systemInfo.asd} $out/src/
+          ln -s $out/src/${prefix}/${asdFile} $out/src/
           sourceRoot=$out/src
         '';
 
