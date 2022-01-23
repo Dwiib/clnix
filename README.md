@@ -31,17 +31,20 @@ If you choose to use it anyway, bug reports would be extremely welcome on the [m
 
 I'm currently using clnix to build my thesis work, and I plan to support it through at least 2023-01-01.
 
-As of 2022-01-23, clnix has the following issues on the 5050 systems in Quicklisp:
+As of 2022-01-23, clnix has the following issues on the 5050 systems in Quicklisp on x86_64-linux:
 
 - skips building 2 systems due to known brokenness
 - skips building 91 systems due to known brokenness in dependencies
-- fails to build 430 systems due to uncategorized build errors
-- skips building 906 systems due to uncategorized build errors in dependencies
+- fails to build 429 systems due to uncategorized build errors
+- skips building 886 systems due to uncategorized build errors in dependencies
 
 This is a 72% build success rate overall.
 
-By comparison, nixpkgs currently has 252 systems in pkgs/development/lisp-modules/quicklisp-to-nix-systems.txt.
-clnix builds all of these on x86_64-linux.
+By comparison, nixpkgs currently has 252 systems in `pkgs/development/lisp-modules/quicklisp-to-nix-systems.txt`.
+clnix builds all of these on aarch64-linux and x86_64-linux.
+
+On aarch64-linux, the numbers are 2, 91, 438, 958, and 71%; and all the systems from `quicklisp-to-nix-systems.txt` can be built.
+More investigation is needed as to which systems fail here in particular.
 
 API
 ---
