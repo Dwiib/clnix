@@ -41,7 +41,7 @@ As of 2022-01-23, clnix has the following issues on the 5050 systems in Quicklis
 This is a 72% build success rate overall.
 
 By comparison, nixpkgs currently has 252 systems in pkgs/development/lisp-modules/quicklisp-to-nix-systems.txt.
-clnix builds all of these except for `cl-async-base` and the systems that depend on it (5 in all), for a 98% build success rate.
+clnix builds all of these on x86_64-linux.
 
 API
 ---

@@ -105,27 +105,52 @@
     "smokebase"
   ];
   systems = {
-    swank = old: {
-      patchPhase = ''
-        # Swank uses its own non-ASDF loader / build system. This doesn't look
-        # at the variables we care about, so we patch it to just hard-code in
-        # the output directory for FASLs. (It's able to find itself by virtue
-        # of ASDF invoking it.)
-        sed -i slime-v2.26.1/swank-loader.lisp \
-          -e "s|(default-fasl-dir)|#p\"$out/lib/slime-v2.26.1/\"|"
-
-        # The aforementioned build system also uses timestamp <= instead of <
-        # to determine when files are out of date, breaking Nix by always
-        # considering two files of equal (in this case zeroed out) timestamp to
-        # be out of date with each other.
-        sed -i slime-v2.26.1/swank-loader.lisp \
-          -e 's/(<= (file-write-date fasl) newest)/(< (file-write-date fasl) newest)/'
-      '';
-    };
-
     # These systems ought to be using complex component names, but... aren't.
     # This breaks loading them without loading the system whose .asd file
     # they're defined in.
+    "cl-async-base" = old: {
+      asdfSystemNames = [ "cl-async" ] ++ old.asdfSystemNames;
+
+      # Since we load cl-async, we need its dependencies, too. This creates a
+      # loop if we just do
+      #
+      #   propagatedBuildInputs = old.propagatedBuildInputs
+      #     ++ lispPackages.cl-async.propagatedBuildInputs
+      #     ++ lispPackages.cl-async-util.propagatedBuildInputs;
+      #
+      # so instead, we list them out.
+      propagatedBuildInputs = [
+        lispPackages.babel
+        lispPackages.bordeaux-threads
+        lispPackages.cffi
+        lispPackages.cl-libuv
+        lispPackages.cl-ppcre
+        lispPackages.fast-io
+        lispPackages.static-vectors
+        lispPackages.trivial-features
+        lispPackages.trivial-gray-streams
+        lispPackages.uiop
+        lispPackages.vom
+      ];
+    };
+    "cl-async-util" = old: {
+      asdfSystemNames = [ "cl-async" ] ++ old.asdfSystemNames;
+
+      # The same issues as for cl-async-base apply (same bug, really).
+      propagatedBuildInputs = [
+        lispPackages.babel
+        lispPackages.bordeaux-threads
+        lispPackages.cffi
+        lispPackages.cl-libuv
+        lispPackages.cl-ppcre
+        lispPackages.fast-io
+        lispPackages.static-vectors
+        lispPackages.trivial-features
+        lispPackages.trivial-gray-streams
+        lispPackages.uiop
+        lispPackages.vom
+      ];
+    };
     "cl-json.test" = old: {
       asdfSystemNames = [ "cl-json" ] ++ old.asdfSystemNames;
     };
@@ -182,6 +207,13 @@
 
       # nixpkgs doesn't ship the hdf5 pkg-config file?
       meta.broken = true;
+    };
+    "cl-async-ssl" = old: {
+      patchPhase = ''
+        sed -i cl-async-20211020-git/src/ssl/package.lisp \
+          -e 's|"libcrypto.so.1.1"|"${openssl.out}/lib/libcrypto.so.1.1"|' \
+          -e 's|"libssl.so.1.1"|"${openssl.out}/lib/libssl.so.1.1"|'
+      '';
     };
     "cl-cffi-gtk-cairo" = old: {
       patchPhase = ''
@@ -273,10 +305,6 @@
           -e 's|"libwebkit2gtk-4.0.so"|"${webkit}/lib/libwebkit2gtk-4.0.so"|'
       '';
     };
-    "cl-unicode" = old: {
-      propagatedBuildInputs = old.propagatedBuildInputs
-        ++ [ lispPackages.flexi-streams ];
-    };
     "clsql-postgresql" = old: {
       patchPhase = ''
         sed -i clsql-20210228-git/db-postgresql/postgresql-loader.lisp \
@@ -357,6 +385,32 @@
 
       # TODO: fix me later...
       meta.broken = true;
+    };
+
+    # Swank has its own build system, so needs custom handling.
+    swank = old: {
+      patchPhase = ''
+        # Swank uses its own non-ASDF loader / build system. This doesn't look
+        # at the variables we care about, so we patch it to just hard-code in
+        # the output directory for FASLs. (It's able to find itself by virtue
+        # of ASDF invoking it.)
+        sed -i slime-v2.26.1/swank-loader.lisp \
+          -e "s|(default-fasl-dir)|#p\"$out/lib/slime-v2.26.1/\"|"
+
+        # The aforementioned build system also uses timestamp <= instead of <
+        # to determine when files are out of date, breaking Nix by always
+        # considering two files of equal (in this case zeroed out) timestamp to
+        # be out of date with each other.
+        sed -i slime-v2.26.1/swank-loader.lisp \
+          -e 's/(<= (file-write-date fasl) newest)/(< (file-write-date fasl) newest)/'
+      '';
+    };
+
+    # cl-unicode seems to be missing a dependency edge?
+    # TODO: Investigate this later.
+    "cl-unicode" = old: {
+      propagatedBuildInputs = old.propagatedBuildInputs
+        ++ [ lispPackages.flexi-streams ];
     };
   };
 }
