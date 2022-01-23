@@ -23,12 +23,25 @@ Non-Goals:
   Patches to improve support for other platforms are welcome on the [mailing list].
 - FHS-ish `$out` layout.
 
-Status:
+Status
+------
 
-This should probably be considered experimental until it's been able to build all of Quicklisp on all the platforms the flake is available for, on at least two Lisp implementations, for at least 3 months or so.
+clnix should probably be considered experimental until it's been able to build all of Quicklisp on all the platforms the flake is available for, on at least two Lisp implementations, for at least 3 months or so.
 If you choose to use it anyway, bug reports would be extremely welcome on the [mailing list].
 
-I'm currently using clnix for my thesis work, and I plan to support it through at least 2022-01-01.
+I'm currently using clnix to build my thesis work, and I plan to support it through at least 2023-01-01.
+
+As of 2022-01-23, clnix has the following issues on the 5050 systems in Quicklisp:
+
+- skips building 2 systems due to known brokenness
+- skips building 91 systems due to known brokenness in dependencies
+- fails to build 430 systems due to uncategorized build errors
+- skips building 906 systems due to uncategorized build errors in dependencies
+
+This is a 72% build success rate overall.
+
+By comparison, nixpkgs currently has 252 systems in pkgs/development/lisp-modules/quicklisp-to-nix-systems.txt.
+clnix builds all of these except for `cl-async-base` and the systems that depend on it (5 in all), for a 98% build success rate.
 
 API
 ---

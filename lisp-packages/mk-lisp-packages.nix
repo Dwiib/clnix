@@ -5,7 +5,8 @@ let
   mkDerivation =
     lispPackages.callPackage ./make-derivation.nix { inherit lisp; };
   otherPackages = callPackage ../pkgs { inherit lispPackages; };
-  quicklispOverrides = lispPackages.callPackage ../quicklisp/overrides.nix { };
+  quicklispOverrides =
+    callPackage ../quicklisp/overrides.nix { inherit lispPackages; };
 
   # Branches on whether a list contains zero, one, or greater than one element.
   zoi = { zero, one ? (x: x), n }:
@@ -110,17 +111,29 @@ let
         '';
       };
     in stdenv.mkDerivation
-    (args // ((quicklispOverrides.${systemName} or (_: { })) args)))
+    (args // ((quicklispOverrides.systems.${systemName} or (_: { })) args)))
     qlSystemInfo;
 
   # a derivation, which is simply a linkFarm of all the systems in Quicklisp,
   # for easily testing that everything works.
   #
   # TODO: Add a checkPhase (or a flake check?) that runs all their tests too.
-  allQuicklispSystems = linkFarm "all-quicklisp-systems" (lib.mapAttrsToList
-    (systemName: systemDrv: {
+  allQuicklispSystems = let
+    allSystemNames = builtins.attrNames qlSystems;
+
+    systemNameNotExcluded = systemName:
+      !(builtins.elem systemName
+        quicklispOverrides.exclude-from-allQuicklispSystems);
+    allNonExcludedSystemNames =
+      builtins.filter systemNameNotExcluded allSystemNames;
+
+    allLinkFarmEntries = builtins.map (systemName: {
       name = systemName;
-      path = systemDrv;
-    }) qlSystems);
+      path = qlSystems.${systemName};
+    }) allNonExcludedSystemNames;
+  in linkFarm "all-quicklisp-systems" (builtins.trace
+    "allQuicklispSystems has ${
+      toString (builtins.length allLinkFarmEntries)
+    } systems" allLinkFarmEntries);
 
 in { inherit allQuicklispSystems mkDerivation; } // qlSystems // otherPackages
