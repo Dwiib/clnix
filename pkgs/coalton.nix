@@ -8,8 +8,8 @@ mkDerivation {
   src = fetchFromGitHub {
     owner = "coalton-lang";
     repo = "coalton";
-    rev = "a1960536c344e6528366f029c169f2cf1d847462";
-    hash = "sha256-jXTB6VhqK7+cQmyGH4vkLjLBl6IrnwS08F489EvQnrw=";
+    rev = "8819e9221c32bd95dbe57a2130afdbbabad49326";
+    hash = "sha256-VRN2epzQKRyGE6F1KNgUUidTE3sLvzpluD8rMz3uCoc=";
   };
 
   propagatedBuildInputs =
