@@ -9,7 +9,8 @@ let
 in {
   inherit (distInfo) systems;
   projects = builtins.mapAttrs (name:
-    { asd-files, md5, prefix, system-deps, url }: {
+    { asd-files, content-sha1 ? null, md5, prefix, size ? null, system-deps, url
+    }: {
       inherit asd-files name prefix system-deps;
       src = fetchurl {
         inherit url;

@@ -44,12 +44,8 @@
         };
 
         devShell = pkgs.mkShell {
-          nativeBuildInputs = [
-            pkgs.perl
-            pkgs.perlPackages.FileSlurp
-            pkgs.perlPackages.JSONMaybeXS
-            pkgs.perlPackages.LWP
-          ];
+          nativeBuildInputs =
+            [ (pkgs.python3.withPackages (ps: [ ps.requests ps.tqdm ])) ];
         };
 
         packages = { sbcl = wrapLisp (pkgs.callPackage ./impls/sbcl.nix { }); };
