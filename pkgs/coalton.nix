@@ -1,19 +1,26 @@
 { alexandria, fetchFromGitHub, float-features, fset, global-vars, lib
-, mkDerivation, split-sequence, trivia }:
+, mkDerivation, split-sequence, trivia, trivial-garbage }:
 
 mkDerivation {
   pname = "coalton";
-  version = "20220113-git";
+  version = "20220526-git";
 
   src = fetchFromGitHub {
     owner = "coalton-lang";
     repo = "coalton";
-    rev = "8819e9221c32bd95dbe57a2130afdbbabad49326";
-    hash = "sha256-VRN2epzQKRyGE6F1KNgUUidTE3sLvzpluD8rMz3uCoc=";
+    rev = "976073173774debfd0619f85a4befc40cc47b06d";
+    hash = "sha256-OuVv+VejGIEcit0LMrMPnqpoP5vvUwTzn9kbyNIuP7c=";
   };
 
-  propagatedBuildInputs =
-    [ alexandria float-features fset global-vars split-sequence trivia ];
+  propagatedBuildInputs = [
+    alexandria
+    float-features
+    fset
+    global-vars
+    split-sequence
+    trivia
+    trivial-garbage
+  ];
 
   meta = {
     description =

@@ -123,7 +123,8 @@ let
 
     systemNameNotExcluded = systemName:
       !(builtins.elem systemName
-        quicklispOverrides.exclude-from-allQuicklispSystems);
+        quicklispOverrides.exclude-from-allQuicklispSystems)
+      && !(lib.hasPrefix "clml" systemName);
     allNonExcludedSystemNames =
       builtins.filter systemNameNotExcluded allSystemNames;
 

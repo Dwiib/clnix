@@ -1,13 +1,15 @@
-{ cairo, fuse, gdk_pixbuf, glfw, glib, gobjectIntrospection, gsl, gtk3, hdf5
+{ cairo, fuse, gdk-pixbuf, glfw, glib, gobject-introspection, gsl, gtk3, hdf5
 , libev, libffi, libfixposix, libglvnd, libuv, lispPackages, mysql-client
-, openblas, openssl, pango, pkg-config, postgresql, qt4, sqlite, webkit, zeromq
-, zstd }:
+, openblas, openssl, pango, pkg-config, protobuf, postgresql, qt4, sqlite
+, webkitgtk, zeromq, zstd }:
 
 {
   exclude-from-allQuicklispSystems = [
     # https://github.com/mmaul/clml/pull/49
+    "clml"
     "clml.data"
     "clml.data.r-datasets"
+    "clml.data.r-datasets-package"
 
     # cl-ana.hdf-cffi is broken, see below.
     "cl-ana"
@@ -186,13 +188,13 @@
       buildInputs = [ libffi ];
       # This is technically a breaking change, but... it's probably fine.
       patchPhase = ''
-        sed -i cffi_0.24.1/libffi/libffi.lisp \
+        sed -i cffi_${old.version}/libffi/libffi.lisp \
           -e 's|"libffi.so.7"|"${libffi}/lib/libffi.so.8"|'
       '';
     };
     "cl+ssl" = old: {
       patchPhase = ''
-        sed -i cl+ssl-20211230-git/src/reload.lisp \
+        sed -i cl+ssl-${old.version}/src/reload.lisp \
           -e 's|"libcrypto.so.1.1"|"${openssl.out}/lib/libcrypto.so.1.1"|' \
           -e 's|"libssl.so.1.1"|"${openssl.out}/lib/libssl.so.1.1"|'
       '';
@@ -201,7 +203,7 @@
       buildInputs = [ hdf5 ];
       nativeBuildInputs = old.nativeBuildInputs ++ [ pkg-config ];
       patchPhase = ''
-        sed -i cl-ana-20211230-git/hdf-cffi/src/library.lisp \
+        sed -i cl-ana-${old.version}/hdf-cffi/src/library.lisp \
           -e 's|"libhdf5.so"|"${hdf5}/lib/libhdf5.so"|'
       '';
 
@@ -210,51 +212,51 @@
     };
     "cl-async-ssl" = old: {
       patchPhase = ''
-        sed -i cl-async-20211020-git/src/ssl/package.lisp \
+        sed -i cl-async-${old.version}/src/ssl/package.lisp \
           -e 's|"libcrypto.so.1.1"|"${openssl.out}/lib/libcrypto.so.1.1"|' \
           -e 's|"libssl.so.1.1"|"${openssl.out}/lib/libssl.so.1.1"|'
       '';
     };
     "cl-cffi-gtk-cairo" = old: {
       patchPhase = ''
-        sed -i cl-cffi-gtk-20201220-git/cairo/cairo.init.lisp \
+        sed -i cl-cffi-gtk-${old.version}/cairo/cairo.init.lisp \
           -e 's|"libcairo.so.2"|"${cairo}/lib/libcairo.so.2"|'
       '';
     };
     "cl-cffi-gtk-gdk" = old: {
       patchPhase = ''
-        sed -i cl-cffi-gtk-20201220-git/gdk/gdk.package.lisp \
+        sed -i cl-cffi-gtk-${old.version}/gdk/gdk.package.lisp \
           -e 's|"libgtk-3.so.0"|"${gtk3}/lib/libgtk-3.so.0"|'
       '';
     };
     "cl-cffi-gtk-gdk-pixbuf" = old: {
       patchPhase = ''
-        sed -i cl-cffi-gtk-20201220-git/gdk-pixbuf/gdk-pixbuf.init.lisp \
-          -e 's|"libgdk_pixbuf-2.0.so.0"|"${gdk_pixbuf}/lib/libgdk_pixbuf-2.0.so.0"|'
+        sed -i cl-cffi-gtk-${old.version}/gdk-pixbuf/gdk-pixbuf.init.lisp \
+          -e 's|"libgdk_pixbuf-2.0.so.0"|"${gdk-pixbuf}/lib/libgdk_pixbuf-2.0.so.0"|'
       '';
     };
     "cl-cffi-gtk-glib" = old: {
       patchPhase = ''
-        sed -i cl-cffi-gtk-20201220-git/glib/glib.init.lisp \
+        sed -i cl-cffi-gtk-${old.version}/glib/glib.init.lisp \
           -e 's|"libglib-2.0.so.0"|"${glib.out}/lib/libglib-2.0.so.0"|' \
           -e 's|"libgthread-2.0.so.0"|"${glib.out}/lib/libgthread-2.0.so.0"|'
       '';
     };
     "cl-cffi-gtk-gobject" = old: {
       patchPhase = ''
-        sed -i cl-cffi-gtk-20201220-git/gobject/gobject.init.lisp \
+        sed -i cl-cffi-gtk-${old.version}/gobject/gobject.init.lisp \
           -e 's|"libgobject-2.0.so.0"|"${glib.out}/lib/libgobject-2.0.so.0"|'
       '';
     };
     "cl-cffi-gtk-gio" = old: {
       patchPhase = ''
-        sed -i cl-cffi-gtk-20201220-git/gio/gio.init.lisp \
+        sed -i cl-cffi-gtk-${old.version}/gio/gio.init.lisp \
           -e 's|"libgio-2.0.so.0"|"${glib.out}/lib/libgio-2.0.so.0"|'
       '';
     };
     "cl-cffi-gtk-pango" = old: {
       patchPhase = ''
-        sed -i cl-cffi-gtk-20201220-git/pango/pango.init.lisp \
+        sed -i cl-cffi-gtk-${old.version}/pango/pango.init.lisp \
           -e 's|"libpango-1.0.so.0"|"${pango.out}/lib/libpango-1.0.so.0"|' \
           -e 's|"libpangocairo-1.0.so.0"|"${pango.out}/lib/libpangocairo-1.0.so.0"|'
       '';
@@ -262,58 +264,59 @@
     "cl-fuse" = old: {
       buildInputs = [ fuse ];
       patchPhase = ''
-        sed -i cl-fuse-20200925-git/fuse-functions.lisp \
+        sed -i cl-fuse-${old.version}/fuse-functions.lisp \
           -e 's|"libfuse"|"${fuse}/lib/libfuse"|'
       '';
     };
     "cl-glfw3" = old: {
       patchPhase = ''
-        sed -i cl-glfw3-20210531-git/glfw-bindings.lisp \
+        sed -i cl-glfw3-${old.version}/glfw-bindings.lisp \
           -e 's|"libglfw.so.3"|"${glfw}/lib/libglfw.so.3"|'
       '';
     };
     "cl-gobject-introspection" = old: {
       patchPhase = ''
-        sed -i cl-gobject-introspection-20210124-git/src/init.lisp \
-          -e 's|"libgirepository-1.0.so.1"|"${gobjectIntrospection}/lib/libgirepository-1.0.so.1"|' \
+        sed -i cl-gobject-introspection-${old.version}/src/init.lisp \
+          -e 's|"libgirepository-1.0.so.1"|"${gobject-introspection}/lib/libgirepository-1.0.so.1"|' \
           -e 's|"libgobject-2.0.so.0"|"${glib.out}/lib/libgobject-2.0.so.0"|'
       '';
     };
     "cl-libuv" = old: {
       buildInputs = [ libuv ];
       patchPhase = ''
-        sed -i cl-libuv-20200610-git/lib.lisp \
+        sed -i cl-libuv-${old.version}/lib.lisp \
           -e 's|"libuv.so.1"|"${libuv}/lib/libuv.so.1"|'
       '';
     };
     "cl-mysql" = old: {
       patchPhase = ''
-        sed -i cl-mysql-20200610-git/system.lisp \
+        sed -i cl-mysql-${old.version}/system.lisp \
           -e 's|"libmysqlclient"|"${mysql-client}/lib/libmysqlclient"|' \
           -e 's|"libmysqlclient_r"|"${mysql-client}/lib/libmysqlclient_r"|'
       '';
     };
     "cl-opengl" = old: {
       patchPhase = ''
-        sed -i cl-opengl-20191130-git/gl/library.lisp \
+        sed -i cl-opengl-${old.version}/gl/library.lisp \
           -e 's|"libGL.so"|"${libglvnd}/lib/libGL.so"|'
       '';
     };
+    "cl-protobufs" = old: { buildInputs = [ protobuf ]; };
     "cl-webkit2" = old: {
       patchPhase = ''
-        sed -i cl-webkit-20211209-git/webkit2/webkit2.init.lisp \
-          -e 's|"libwebkit2gtk-4.0.so"|"${webkit}/lib/libwebkit2gtk-4.0.so"|'
+        sed -i cl-webkit-${old.version}/webkit2/webkit2.init.lisp \
+          -e 's|"libwebkit2gtk-4.0.so"|"${webkitgtk}/lib/libwebkit2gtk-4.0.so"|'
       '';
     };
     "clsql-postgresql" = old: {
       patchPhase = ''
-        sed -i clsql-20210228-git/db-postgresql/postgresql-loader.lisp \
+        sed -i clsql-${old.version}/db-postgresql/postgresql-loader.lisp \
           -e 's|"libpq"|"${postgresql.lib}/lib/libpq"|'
       '';
     };
     "clsql-sqlite3" = old: {
       patchPhase = ''
-        sed -i clsql-20210228-git/db-sqlite3/sqlite3-loader.lisp \
+        sed -i clsql-${old.version}/db-sqlite3/sqlite3-loader.lisp \
           -e 's|"libsqlite3"|"${sqlite.out}/lib/libsqlite3"|'
       '';
     };
@@ -336,40 +339,40 @@
     };
     "lev" = old: {
       patchPhase = ''
-        sed -i lev-20150505-git/src/lev.lisp \
+        sed -i lev-${old.version}/src/lev.lisp \
           -e 's|"libev.so"|"${libev}/lib/libev.so"|'
       '';
     };
     "lla" = old: {
       patchPhase = ''
-        sed -i lla-20180328-git/src/configuration.lisp \
+        sed -i lla-${old.version}/src/configuration.lisp \
           -e 's|"libblas.so"|"${openblas}/lib/libblas.so"|' \
           -e 's|"liblapack.so"|"${openblas}/lib/liblapack.so"|'
       '';
     };
     "sqlite" = old: {
       patchPhase = ''
-        sed -i cl-sqlite-20190813-git/sqlite-ffi.lisp \
+        sed -i cl-sqlite-${old.version}/sqlite-ffi.lisp \
           -e 's|"libsqlite3.so.0"|"${sqlite.out}/lib/libsqlite3.so.0"|'
       '';
     };
     "zeromq" = old: {
       buildInputs = [ zeromq ];
       patchPhase = ''
-        sed -i cl-zmq-20160318-git/src/package.lisp \
+        sed -i cl-zmq-${old.version}/src/package.lisp \
           -e 's|"libzmq.so.0.0.0"|"${zeromq}/lib/libzmq.so.5.2.4"|'
       '';
     };
     "zmq" = old: {
       buildInputs = [ zeromq ];
       patchPhase = ''
-        sed -i lisp-zmq-20200218-git/src/ffi.lisp \
+        sed -i lisp-zmq-${old.version}/src/ffi.lisp \
           -e 's|"libzmq"|"${zeromq}/lib/libzmq"|'
       '';
     };
     "zstd" = old: {
       patchPhase = ''
-        sed -i cl-zstd-20210124-git/src/libzstd.lisp \
+        sed -i cl-zstd-${old.version}/src/libzstd.lisp \
           -e 's|"libzstd.so"|"${zstd.out}/lib/libzstd.so"|'
       '';
     };
@@ -378,7 +381,7 @@
     # too fundamentally different from the CFFI logic.
     "qt-libs" = old: {
       patchPhase = ''
-        sed -i qt-libs-20210531-git/qt4.lisp \
+        sed -i qt-libs-${old.version}/qt4.lisp \
           -e 's|#p"/usr/local/Trolltech/Qt-4.8.7/lib/"|#p"${qt4.out}/lib/"|' \
           -e 's|#p"/usr/local/Trolltech/Qt-4.8.7/plugins/"|#p"${qt4.out}/lib/qt4/plugins/"|'
       '';
@@ -394,14 +397,14 @@
         # at the variables we care about, so we patch it to just hard-code in
         # the output directory for FASLs. (It's able to find itself by virtue
         # of ASDF invoking it.)
-        sed -i slime-v2.26.1/swank-loader.lisp \
-          -e "s|(default-fasl-dir)|#p\"$out/lib/slime-v2.26.1/\"|"
+        sed -i slime-${old.version}/swank-loader.lisp \
+          -e "s|(default-fasl-dir)|#p\"$out/lib/slime-${old.version}/\"|"
 
         # The aforementioned build system also uses timestamp <= instead of <
         # to determine when files are out of date, breaking Nix by always
         # considering two files of equal (in this case zeroed out) timestamp to
         # be out of date with each other.
-        sed -i slime-v2.26.1/swank-loader.lisp \
+        sed -i slime-${old.version}/swank-loader.lisp \
           -e 's/(<= (file-write-date fasl) newest)/(< (file-write-date fasl) newest)/'
       '';
     };

@@ -43,7 +43,7 @@
             quicklisp-to-nix-systems-test packages.sbcl;
         };
 
-        devShell = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           nativeBuildInputs =
             [ (pkgs.python3.withPackages (ps: [ ps.requests ps.tqdm ])) ];
         };
