@@ -45,6 +45,10 @@
             [ (pkgs.python3.withPackages (ps: [ ps.requests ps.tqdm ])) ];
         };
 
-        packages = { sbcl = wrapLisp (pkgs.callPackage ./impls/sbcl.nix { }); };
+        packages = {
+          asdf = pkgs.callPackage ./pkgs/asdf.nix { };
+          sbcl = wrapLisp
+            (pkgs.callPackage ./impls/sbcl.nix { inherit (packages) asdf; });
+        };
       });
 }
