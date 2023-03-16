@@ -36,6 +36,8 @@
               }) quicklisp-to-nix-systems-non-broken;
             in pkgs.linkFarm "quicklisp-to-nix-systems/${lisp.pname}" entries;
         in {
+          "quicklisp-to-nix-systems/ccl" =
+            quicklisp-to-nix-systems-test packages.ccl;
           "quicklisp-to-nix-systems/sbcl" =
             quicklisp-to-nix-systems-test packages.sbcl;
         };
@@ -47,6 +49,7 @@
 
         packages = {
           asdf = pkgs.callPackage ./pkgs/asdf.nix { };
+          ccl = wrapLisp (pkgs.callPackage ./impls/ccl.nix { });
           sbcl = wrapLisp
             (pkgs.callPackage ./impls/sbcl.nix { inherit (packages) asdf; });
         };

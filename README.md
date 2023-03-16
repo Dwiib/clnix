@@ -59,7 +59,7 @@ Added 14 variables.
 
 ### Implementations
 
-For each implementation we support (currently only SBCL), there is an appropriately-named package.
+For each implementation we support, there is an appropriately-named package.
 
 ```
 nix-repl> sbcl = outputs.packages.aarch64-linux.sbcl
