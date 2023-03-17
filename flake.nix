@@ -49,7 +49,8 @@
 
         packages = {
           asdf = pkgs.callPackage ./pkgs/asdf.nix { };
-          ccl = wrapLisp (pkgs.callPackage ./impls/ccl.nix { });
+          ccl = wrapLisp
+            (pkgs.callPackage ./impls/ccl.nix { inherit (packages) asdf; });
           sbcl = wrapLisp
             (pkgs.callPackage ./impls/sbcl.nix { inherit (packages) asdf; });
         };
