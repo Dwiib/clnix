@@ -1,4 +1,4 @@
-{ lib, lisp, lispPackages, stdenv, writeText }:
+{ lib, lisp, stdenv, writeText }:
 
 args:
 

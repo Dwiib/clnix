@@ -2,8 +2,7 @@
 }:
 
 let
-  mkDerivation =
-    lispPackages.callPackage ./make-derivation.nix { inherit lisp; };
+  mkDerivation = callPackage ./make-derivation.nix { inherit lisp; };
   otherPackages = callPackage ../pkgs { inherit lispPackages; };
   quicklispOverrides =
     callPackage ../quicklisp/overrides.nix { inherit lispPackages; };
