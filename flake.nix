@@ -38,6 +38,8 @@
         in {
           "quicklisp-to-nix-systems/ccl" =
             quicklisp-to-nix-systems-test packages.ccl;
+          "quicklisp-to-nix-systems/ecl" =
+            quicklisp-to-nix-systems-test packages.ecl;
           "quicklisp-to-nix-systems/sbcl" =
             quicklisp-to-nix-systems-test packages.sbcl;
         };
@@ -51,6 +53,8 @@
           asdf = pkgs.callPackage ./pkgs/asdf.nix { };
           ccl = wrapLisp
             (pkgs.callPackage ./impls/ccl.nix { inherit (packages) asdf; });
+          ecl = wrapLisp
+            (pkgs.callPackage ./impls/ecl.nix { inherit (packages) asdf; });
           sbcl = wrapLisp
             (pkgs.callPackage ./impls/sbcl.nix { inherit (packages) asdf; });
         };
