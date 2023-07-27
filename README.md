@@ -122,7 +122,7 @@ Recipes
 In flake.nix, or anywhere else:
 
 ```nix
-let clnixPkgs = clnix.packages.${system};
+let sbcl = clnix.packages.${system}.sbcl;
  in sbcl.packages.callPackage ./my-package.nix {};
 ```
 

@@ -6,12 +6,12 @@ let
 
 in stdenv.mkDerivation rec {
   pname = "sbcl";
-  version = "2.3.2";
+  version = "2.3.6";
 
   src = fetchurl {
     url =
       "mirror://sourceforge/project/sbcl/sbcl/${version}/${pname}-${version}-source.tar.bz2";
-    hash = "sha256-RMwWLPpjMqmojHoSHRkDiCikuk9r/7d+8cexdAfLHqo=";
+    hash = "sha256-tEFMpNmnR06NiE19YyN+LynvRZ39WoSEJKnD+lUdGbk=";
   };
 
   nativeBuildInputs = [ texinfo ];
