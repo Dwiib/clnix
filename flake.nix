@@ -1,6 +1,6 @@
 {
   description = "An alternative packaging for Common Lisp packages in Nix.";
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/22.11";
+  inputs.nixpkgs.url = "path:./nixpkgs-custom";
   outputs = { self, flake-utils, nixpkgs }:
     flake-utils.lib.eachDefaultSystem (system:
       let
