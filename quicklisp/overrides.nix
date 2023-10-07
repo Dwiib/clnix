@@ -1,6 +1,6 @@
 { cairo, fuse, gdk-pixbuf, glfw, glib, gobject-introspection, gsl, gtk3, hdf5
 , libev, libffi, libfixposix, libglvnd, libuv, lispPackages, mysql-client
-, openblas, openssl, openssl_1_1, pango, pkg-config, protobuf, postgresql, qt4, sqlite
+, openblas, openssl, pango, pkg-config, protobuf, postgresql, qt4, sqlite
 , webkitgtk, zeromq, zstd }:
 
 {
@@ -193,10 +193,11 @@
       '';
     };
     "cl+ssl" = old: {
+      #https://github.com/cl-plus-ssl/cl-plus-ssl/commit/c08c60e624050c114e55e7b8c4e3581cf54f2f4b
       patchPhase = ''
         sed -i cl+ssl-${old.version}/src/reload.lisp \
-          -e 's|"libcrypto.so.1.1"|"${openssl_1_1.out}/lib/libcrypto.so.1.1"|' \
-          -e 's|"libssl.so.1.1"|"${openssl_1_1.out}/lib/libssl.so.1.1"|'
+          -e 's|"libcrypto.so.1.1"|"${openssl.out}/lib/libcrypto.so.3"|' \
+          -e 's|"libssl.so.1.1"|"${openssl.out}/lib/libssl.so.3"|'
       '';
     };
     "cl-ana.hdf-cffi" = old: {
@@ -212,9 +213,10 @@
     };
     "cl-async-ssl" = old: {
       patchPhase = ''
+        #HACK: libcrypto.so.3 is not officially supported for cl-async, probably broken
         sed -i cl-async-${old.version}/src/ssl/package.lisp \
-          -e 's|"libcrypto.so.1.1"|"${openssl.out}/lib/libcrypto.so.1.1"|' \
-          -e 's|"libssl.so.1.1"|"${openssl.out}/lib/libssl.so.1.1"|'
+          -e 's|"libcrypto.so.1.1"|"${openssl.out}/lib/libcrypto.so.3"|' \
+          -e 's|"libssl.so.1.1"|"${openssl.out}/lib/libssl.so.3"|'
       '';
     };
     "cl-cffi-gtk-cairo" = old: {
