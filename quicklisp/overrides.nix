@@ -188,8 +188,8 @@
       buildInputs = [ libffi ];
       # This is technically a breaking change, but... it's probably fine.
       patchPhase = ''
-        sed -i cffi_${old.version}/libffi/libffi.lisp \
-          -e 's|"libffi.so.7"|"${libffi}/lib/libffi.so.8"|'
+        sed -i cffi-${old.version}/libffi/libffi.lisp \
+          -e 's|"libffi.so.8"|"${libffi}/lib/libffi.so.8"|'
       '';
     };
     "cl+ssl" = old: {
